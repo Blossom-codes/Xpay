@@ -41,8 +41,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         validateDateRange(startDate, endDate);
 
-        TransactionStatus txnStatus =
-                status != null ? TransactionStatus.valueOf(status.toUpperCase()) : null;
+        TransactionStatus txnStatus = parseStatus(status);
 
         Specification<Transaction> spec = Specification
                 .where(TransactionSpecification.hasStatus(txnStatus))
@@ -51,6 +50,19 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionRepository.findAll(spec, pageable)
                 .map(this::getTransactionResponse);
+    }
+
+    private TransactionStatus parseStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+
+        try {
+            return TransactionStatus.valueOf(status.toUpperCase());
+        } catch (Exception ex) {
+            log.error("An error has occurred:{}", ex.getMessage(), ex);
+            throw new CustomException("Invalid transaction status: " + status);
+        }
     }
 
     public TransactionResponse getTransactionResponse(Transaction saved) {

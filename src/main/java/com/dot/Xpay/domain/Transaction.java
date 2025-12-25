@@ -2,10 +2,7 @@ package com.dot.Xpay.domain;
 
 import com.dot.Xpay.enums.TransactionStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -24,6 +21,7 @@ import java.time.ZonedDateTime;
 )
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {
@@ -56,6 +54,9 @@ public class Transaction {
 
     @Column(name = "status_message")
     private String statusMessage;
+
+    @Column(name = "status_code")
+    private String statusCode;
 
     @Column(name = "commission_worthy")
     private Boolean commissionWorthy = false;

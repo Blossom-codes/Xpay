@@ -35,7 +35,7 @@ public class TransferServiceImpl implements TransferService {
     @Transactional
     public BaseResponse transfer(TransferRequest request) {
 
-        String reference = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+        String reference = UUID.randomUUID().toString().replace("-", "").toUpperCase().substring(0,16);
 
         try {
             Account sender = accountRepository.findByAccountNumber(request.getSourceAccount())
@@ -60,6 +60,8 @@ public class TransferServiceImpl implements TransferService {
                         .amount(amount)
                         .transactionFee(BigDecimal.ZERO)
                         .billedAmount(BigDecimal.ZERO)
+                        .commission(BigDecimal.ZERO)
+                        .commissionWorthy(false)
                         .status(TransactionStatus.INSUFFICIENT_FUND)
                         .statusCode(TransactionStatus.INSUFFICIENT_FUND.getCode())
                         .statusMessage(TransactionStatus.INSUFFICIENT_FUND.getMessage())
@@ -126,6 +128,8 @@ public class TransferServiceImpl implements TransferService {
                     .amount(request.getAmount())
                     .transactionFee(BigDecimal.ZERO)
                     .billedAmount(BigDecimal.ZERO)
+                    .commission(BigDecimal.ZERO)
+                    .commissionWorthy(false)
                     .status(TransactionStatus.FAILED)
                     .statusMessage(TransactionStatus.FAILED.getMessage())
                     .statusCode(TransactionStatus.FAILED.getCode())

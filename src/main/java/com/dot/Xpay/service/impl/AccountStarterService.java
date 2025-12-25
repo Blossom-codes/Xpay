@@ -5,6 +5,7 @@ import com.dot.Xpay.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -12,7 +13,8 @@ import java.math.BigDecimal;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AccountService implements CommandLineRunner {
+@Profile("dev")
+public class AccountStarterService implements CommandLineRunner {
 
     private final AccountRepository accountRepository;
 

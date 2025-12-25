@@ -1,22 +1,16 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '4.0.1'
+	id 'org.springframework.boot' version '3.2.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.dot'
 version = '0.0.1-SNAPSHOT'
-description = 'A simple Java web application to simulate money transfer operation between two bank accounts.'
+description = 'Money transfer simulation service'
 
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
 	}
 }
 
@@ -25,20 +19,28 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-h2console'
+	// Web & REST
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// JPA & DB
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
+
+	// Validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Flyway (recommended)
+	implementation 'org.flywaydb:flyway-core'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Dev tools
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// Testing
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {

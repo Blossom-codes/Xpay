@@ -58,6 +58,9 @@ public class Transaction {
     @Column(name = "status_code")
     private String statusCode;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "commission_worthy")
     private Boolean commissionWorthy = false;
 

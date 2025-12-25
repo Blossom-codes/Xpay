@@ -3,6 +3,8 @@ package com.dot.Xpay.controller;
 import com.dot.Xpay.dto.response.TransactionResponse;
 import com.dot.Xpay.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,12 +24,14 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping("")
-    public ResponseEntity<List<TransactionResponse>> getTransactions(
+    public ResponseEntity<Page<TransactionResponse>> getTransactions(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String accountNumber,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        List<TransactionResponse> transactions = transactionService.getTransactions(status, accountNumber, startDate, endDate);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            Pageable pageable
+    ) {
+        Page<TransactionResponse> transactions = transactionService.getTransactions(status, accountNumber, startDate, endDate, pageable);
         return ResponseEntity.ok(transactions);
     }
 

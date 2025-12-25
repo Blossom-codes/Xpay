@@ -36,7 +36,7 @@ public class TransferServiceImpl implements TransferService {
     public BaseResponse transfer(TransferRequest request) {
 
         String reference = UUID.randomUUID().toString().replace("-", "").toUpperCase().substring(0,16);
-
+        String description = request.getDescription();
         try {
             Account sender = accountRepository.findByAccountNumber(request.getSourceAccount())
                     .orElseThrow(() ->
@@ -62,6 +62,7 @@ public class TransferServiceImpl implements TransferService {
                         .billedAmount(BigDecimal.ZERO)
                         .commission(BigDecimal.ZERO)
                         .commissionWorthy(false)
+                        .description(description)
                         .status(TransactionStatus.INSUFFICIENT_FUND)
                         .statusCode(TransactionStatus.INSUFFICIENT_FUND.getCode())
                         .statusMessage(TransactionStatus.INSUFFICIENT_FUND.getMessage())
@@ -103,6 +104,7 @@ public class TransferServiceImpl implements TransferService {
                     .billedAmount(billedAmount)
                     .commission(commission)
                     .commissionWorthy(true)
+                    .description(description)
                     .status(TransactionStatus.SUCCESSFUL)
                     .statusMessage(TransactionStatus.SUCCESSFUL.getMessage())
                     .statusCode(TransactionStatus.SUCCESSFUL.getCode())
@@ -128,6 +130,7 @@ public class TransferServiceImpl implements TransferService {
                     .amount(request.getAmount())
                     .transactionFee(BigDecimal.ZERO)
                     .billedAmount(BigDecimal.ZERO)
+                    .description(description)
                     .commission(BigDecimal.ZERO)
                     .commissionWorthy(false)
                     .status(TransactionStatus.FAILED)
@@ -157,6 +160,7 @@ public class TransferServiceImpl implements TransferService {
         transactionResponse.setStatusMessage(saved.getStatus().getMessage());
         transactionResponse.setCommissionWorthy(saved.getCommissionWorthy());
         transactionResponse.setCommission(saved.getCommission());
+        transactionResponse.setDescription(saved.getDescription());
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         transactionResponse.setCreatedAt(saved.getCreatedAt() != null ? saved.getCreatedAt().format(dateFormatter) : ZonedDateTime.now().format(dateFormatter));
         return transactionResponse;

@@ -20,5 +20,6 @@ public class TransactionResponse {
     private String statusMessage;
     private Boolean commissionWorthy;
     private BigDecimal commission;
+    private String description;
     private String createdAt;
 }

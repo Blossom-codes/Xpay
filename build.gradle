@@ -22,6 +22,9 @@ dependencies {
 	// Web & REST
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
+	implementation "net.javacrumbs.shedlock:shedlock-spring:5.13.0"
+	implementation "net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.13.0"
+
 	// JPA & DB
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'com.h2database:h2'

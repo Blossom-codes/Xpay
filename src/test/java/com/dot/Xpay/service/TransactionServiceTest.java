@@ -223,5 +223,57 @@ class TransactionServiceTest {
         verify(dailySummaryRepository).save(any());
     }
 
+    @Test
+    void processCommissions_noTransactions() {
+        // Arrange
+        when(transactionRepository.findUnprocessedSuccessfulTransactions()).thenReturn(List.of());
+
+        // Act
+        transactionService.processCommissions();
+
+        // Assert
+        verify(transactionRepository, never()).save(any(Transaction.class));
+    }
+
+    @Test
+    void processCommissions_someTransactions() {
+        // Arrange
+        Transaction txn1 = Transaction.builder()
+                .id("1")
+                .amount(BigDecimal.valueOf(1000))
+                .transactionFee(BigDecimal.valueOf(5)) // 0.5% of 1000 = 5
+                .commission(BigDecimal.ZERO)
+                .commissionWorthy(false)
+                .commissionProcessed(false)
+                .build();
+
+        Transaction txn2 = Transaction.builder()
+                .id("2")
+                .amount(BigDecimal.valueOf(50_000))
+                .transactionFee(BigDecimal.valueOf(100)) // capped at 100
+                .commission(BigDecimal.ZERO)
+                .commissionWorthy(false)
+                .commissionProcessed(false)
+                .build();
+
+        when(transactionRepository.findUnprocessedSuccessfulTransactions()).thenReturn(List.of(txn1, txn2));
+
+        // Act
+        transactionService.processCommissions();
+
+        // Assert
+        // Commission = 20% of fee
+        verify(transactionRepository, times(2)).save(any(Transaction.class));
+
+        // Ensure commission flags are set
+        assertEquals(0, txn1.getCommission().compareTo(BigDecimal.valueOf(1)));
+        assertTrue(txn1.getCommissionWorthy());
+        assertTrue(txn1.getCommissionProcessed());
+
+        assertEquals(0, txn2.getCommission().compareTo(BigDecimal.valueOf(20)));
+        assertTrue(txn2.getCommissionWorthy());
+        assertTrue(txn2.getCommissionProcessed());
+
+    }
 
 }

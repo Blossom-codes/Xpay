@@ -1,6 +1,8 @@
 package com.dot.Xpay.controller;
 
 import com.dot.Xpay.dto.response.TransactionResponse;
+import com.dot.Xpay.dto.response.TransactionSummaryResponse;
+import com.dot.Xpay.enums.GenerationMode;
 import com.dot.Xpay.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/transactions")
@@ -36,9 +36,9 @@ public class TransactionController {
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<Map<String, Object>> getTransactionSummary(
+    public ResponseEntity<TransactionSummaryResponse> getTransactionSummary(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-//        Map<String, Object> summary = transactionService.getSummary(date);
-        return ResponseEntity.ok(null);
+        TransactionSummaryResponse summary = transactionService.generateAndSaveSummary(date, GenerationMode.READ_ONLY);
+        return ResponseEntity.ok(summary);
     }
 }

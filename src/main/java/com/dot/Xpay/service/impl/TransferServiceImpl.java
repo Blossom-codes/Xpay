@@ -121,7 +121,7 @@ public class TransferServiceImpl implements TransferService {
 
         } catch (Exception ex) {
             // Handle any unexpected failure
-            log.error("Transaction failed due to a system error; {}", ex.getMessage());
+            log.error("Transaction with ref: [{}] failed due to a system error; {}", reference, ex.getMessage());
 
             Transaction failedTxn = Transaction.builder()
                     .reference(reference)

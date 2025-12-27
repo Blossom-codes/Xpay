@@ -63,6 +63,8 @@ public class Transaction {
 
     @Column(name = "commission_worthy")
     private Boolean commissionWorthy = false;
+    @Column(name = "commission_processed")
+    private Boolean commissionProcessed = false;
 
     @Column(precision = 19, scale = 2)
     private BigDecimal commission;

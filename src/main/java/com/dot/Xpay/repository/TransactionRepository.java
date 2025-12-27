@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Repository
 public interface TransactionRepository
@@ -27,5 +28,12 @@ public interface TransactionRepository
             AND t.createdAt BETWEEN :startDate AND :endDate
             """)
     TransactionSummaryResponse getTransactionsSummary(@Param("startDate") ZonedDateTime startDate, @Param("endDate") ZonedDateTime endDate);
+
+    @Query(value = """
+            SELECT * FROM transactions
+            WHERE status = 'SUCCESSFUL'
+            AND commission_processed = false
+            """, nativeQuery = true)
+    List<Transaction> findUnprocessedSuccessfulTransactions();
 }
 

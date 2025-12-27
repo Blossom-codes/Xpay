@@ -13,4 +13,5 @@ public interface TransactionService {
 
     Page<TransactionResponse> getTransactions(String status, String accountNumber, LocalDate startDate, LocalDate endDate, Pageable pageable);
     TransactionSummaryResponse generateAndSaveSummary(LocalDate date, GenerationMode mode);
+    void processCommissions();
 }

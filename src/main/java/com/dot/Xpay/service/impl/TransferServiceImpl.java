@@ -37,6 +37,7 @@ public class TransferServiceImpl implements TransferService {
 
         String reference = UUID.randomUUID().toString().replace("-", "").toUpperCase().substring(0,16);
         String description = request.getDescription();
+
         try {
             Account sender = accountRepository.findByAccountNumber(request.getSourceAccount())
                     .orElseThrow(() ->
@@ -50,7 +51,7 @@ public class TransferServiceImpl implements TransferService {
 
             BigDecimal amount = request.getAmount();
 
-            // Insufficient funds check
+            // Insufficient funds check (amount only)
             if (sender.getBalance().compareTo(amount) < 0) {
 
                 Transaction failedTxn = Transaction.builder()
@@ -62,6 +63,7 @@ public class TransferServiceImpl implements TransferService {
                         .billedAmount(BigDecimal.ZERO)
                         .commission(BigDecimal.ZERO)
                         .commissionWorthy(false)
+                        .commissionProcessed(false)
                         .description(description)
                         .status(TransactionStatus.INSUFFICIENT_FUND)
                         .statusCode(TransactionStatus.INSUFFICIENT_FUND.getCode())
@@ -91,10 +93,7 @@ public class TransferServiceImpl implements TransferService {
             accountRepository.save(sender);
             accountRepository.save(receiver);
 
-            // Calculate commission
-            BigDecimal commission = fee.multiply(BigDecimal.valueOf(0.20));
-
-            // Save successful transaction
+            // Save successful transaction (raw)
             Transaction transaction = Transaction.builder()
                     .reference(reference)
                     .sourceAccount(sender.getAccountNumber())
@@ -102,26 +101,26 @@ public class TransferServiceImpl implements TransferService {
                     .amount(amount)
                     .transactionFee(fee)
                     .billedAmount(billedAmount)
-                    .commission(commission)
-                    .commissionWorthy(true)
+                    .commission(BigDecimal.ZERO)
+                    .commissionWorthy(false)
+                    .commissionProcessed(false)
                     .description(description)
                     .status(TransactionStatus.SUCCESSFUL)
-                    .statusMessage(TransactionStatus.SUCCESSFUL.getMessage())
                     .statusCode(TransactionStatus.SUCCESSFUL.getCode())
+                    .statusMessage(TransactionStatus.SUCCESSFUL.getMessage())
                     .build();
 
-            TransactionResponse transactionResponse =
-                    getTransactionResponse(transactionRepository.save(transaction));
+            Transaction saved = transactionRepository.save(transaction);
 
             return new BaseResponse(
                     TransactionStatus.SUCCESSFUL.getCode(),
                     TransactionStatus.SUCCESSFUL.getMessage(),
-                    transactionResponse
+                    getTransactionResponse(saved)
             );
 
         } catch (Exception ex) {
-            // Handle any unexpected failure
-            log.error("Transaction with ref: [{}] failed due to a system error; {}", reference, ex.getMessage());
+
+            log.error("Transaction with ref [{}] failed due to system error", reference, ex);
 
             Transaction failedTxn = Transaction.builder()
                     .reference(reference)
@@ -130,12 +129,13 @@ public class TransferServiceImpl implements TransferService {
                     .amount(request.getAmount())
                     .transactionFee(BigDecimal.ZERO)
                     .billedAmount(BigDecimal.ZERO)
-                    .description(description)
                     .commission(BigDecimal.ZERO)
                     .commissionWorthy(false)
+                    .commissionProcessed(false)
+                    .description(description)
                     .status(TransactionStatus.FAILED)
-                    .statusMessage(TransactionStatus.FAILED.getMessage())
                     .statusCode(TransactionStatus.FAILED.getCode())
+                    .statusMessage(TransactionStatus.FAILED.getMessage())
                     .build();
 
             transactionRepository.save(failedTxn);

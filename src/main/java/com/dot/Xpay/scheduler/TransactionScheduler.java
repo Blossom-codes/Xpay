@@ -5,6 +5,7 @@ import com.dot.Xpay.enums.GenerationMode;
 import com.dot.Xpay.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,13 @@ public class TransactionScheduler {
 
     private final TransactionService transactionService;
 
-    // Runs daily at 00:01 AM
-    @Scheduled(cron = "0 1 0 * * ?")
+    // Runs daily at 01:00 AM
+    @Scheduled(cron = "0 0 1 * * ?", zone = "Africa/Lagos")
+    @SchedulerLock(
+            name = "generatePreviousDaySummary",
+            lockAtMostFor = "10m",
+            lockAtLeastFor = "5m"
+    )
     public void generatePreviousDaySummary() {
 
         LocalDate yesterday = LocalDate.now().minusDays(1);
@@ -29,4 +35,25 @@ public class TransactionScheduler {
         log.info("Daily summary generated for {} -> {}", yesterday, summary);
     }
 
+    /**
+     * Runs twice daily at 12:00 AM and 12:00 PM
+     */
+    @Scheduled(cron = "0 0 0/12 * * ?", zone = "Africa/Lagos")
+    @SchedulerLock(
+            name = "processDailyCommissions",
+            lockAtLeastFor = "5m",
+            lockAtMostFor = "10m"
+    )
+    public void processDailyCommissions() {
+
+        log.info("Starting daily commission processing");
+
+        try {
+            transactionService.processCommissions();
+        } catch (Exception ex) {
+            log.error("Commission scheduler failed", ex);
+        }
+
+        log.info("Daily commission processing completed");
+    }
 }

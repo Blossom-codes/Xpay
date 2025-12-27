@@ -20,8 +20,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -29,7 +31,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
-
+    private static final BigDecimal COMMISSION_RATE = BigDecimal.valueOf(0.20);
     private final TransactionRepository transactionRepository;
     private final TransactionDailySummaryRepository dailySummaryRepository;
 
@@ -108,6 +110,37 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         return summary;
+    }
+
+    @Override
+    @Transactional
+    public void processCommissions() {
+
+        List<Transaction> transactions =
+                transactionRepository.findUnprocessedSuccessfulTransactions();
+
+        if (transactions.isEmpty()) {
+            log.info("No transactions pending commission processing");
+            return;
+        }
+
+        for (Transaction transaction : transactions) {
+
+            // get transaction fee (0.5% of amount capped at 100)
+            BigDecimal fee = transaction.getTransactionFee();
+
+            // Calculate commission (20% of fee)
+            BigDecimal commission = fee.multiply(COMMISSION_RATE);
+
+            transaction.setTransactionFee(fee);
+            transaction.setCommission(commission);
+            transaction.setCommissionWorthy(commission.compareTo(BigDecimal.ZERO) > 0);
+            transaction.setCommissionProcessed(true);
+
+            transactionRepository.save(transaction);
+        }
+
+        log.info("Successfully processed {} transaction commissions", transactions.size());
     }
 
 

@@ -4,6 +4,10 @@ import com.dot.Xpay.dto.response.TransactionResponse;
 import com.dot.Xpay.dto.response.TransactionSummaryResponse;
 import com.dot.Xpay.enums.GenerationMode;
 import com.dot.Xpay.service.TransactionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,20 +27,60 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    @Operation(
+            summary = "Get transactions",
+            description = "Returns a paginated list of transactions with optional filtering by status, account number, and date range."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid filter parameters")
+    })
     @GetMapping("")
     public ResponseEntity<Page<TransactionResponse>> getTransactions(
-            @RequestParam(required = false) String status,
+            @Parameter(
+                    description = "Transaction status (SUCCESSFUL, FAILED, INSUFFICIENT_FUND)",
+                    example = "SUCCESSFUL"
+            )@RequestParam(required = false) String status,
+            @Parameter(
+                    description = "Account number (source or destination)",
+                    example = "53000001"
+            )
             @RequestParam(required = false) String accountNumber,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+
+            @Parameter(
+                    description = "Start date (inclusive)",
+                    example = "2025-01-01"
+            )
+            @RequestParam(required = false) LocalDate startDate,
+
+            @Parameter(
+                    description = "End date (inclusive)",
+                    example = "2025-01-31"
+            )
+            @RequestParam(required = false) LocalDate endDate,
+
+            @Parameter(description = "Pagination information")
             Pageable pageable
     ) {
         Page<TransactionResponse> transactions = transactionService.getTransactions(status, accountNumber, startDate, endDate, pageable);
         return ResponseEntity.ok(transactions);
     }
 
+    @Operation(
+            summary = "Get daily transaction summary",
+            description = "Returns aggregated transaction statistics for a given date."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Summary retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid date"),
+            @ApiResponse(responseCode = "404", description = "Summary not found")
+    })
     @GetMapping("/summary")
     public ResponseEntity<TransactionSummaryResponse> getTransactionSummary(
+            @Parameter(
+                    description = "Summary date",
+                    example = "2025-01-09"
+            )
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         TransactionSummaryResponse summary = transactionService.generateAndSaveSummary(date, GenerationMode.READ_ONLY);
         return ResponseEntity.ok(summary);

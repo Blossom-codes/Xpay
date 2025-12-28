@@ -41,12 +41,12 @@ public class TransferServiceImpl implements TransferService {
         try {
             Account sender = accountRepository.findByAccountNumber(request.getSourceAccount())
                     .orElseThrow(() ->
-                            new CustomException("No account found with account number " + request.getSourceAccount())
+                            new EntityNotFoundException("No account found with account number " + request.getSourceAccount())
                     );
 
             Account receiver = accountRepository.findByAccountNumber(request.getDestinationAccount())
                     .orElseThrow(() ->
-                            new CustomException("No account found with account number " + request.getDestinationAccount())
+                            new EntityNotFoundException("No account found with account number " + request.getDestinationAccount())
                     );
 
             BigDecimal amount = request.getAmount();

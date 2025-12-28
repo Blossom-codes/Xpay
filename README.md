@@ -12,6 +12,59 @@ The system follows real-world financial system patterns:
 * All scheduled jobs are safe for multi-instance deployments
 
 ---
+## ▶️Running the Application Prerequisites
+
+* Java 17+
+* Gradle 7+
+* A configured database (see application.properties)
+
+**Steps to Run**
+
+1. Clone the repository
+   `git clone <repository-url>`
+   `cd <project-directory>`
+2. Configure application properties
+   Update the following in application.properties:
+   Database connection: (spring.datasource.*)
+
+    Active profile: (spring.profiles.active=dev)
+3. Build the application
+
+`./gradlew clean build
+`
+
+(Windows)
+
+`gradlew clean build`
+
+
+Run the application
+
+`./gradlew bootRun
+`
+
+Or run the generated JAR:
+
+`java -jar build/libs/<application-name>.jar
+`
+Accessing the Application
+
+**API Base URL**
+
+http://localhost:8080/Xpay/v1/api
+
+
+**Swagger API Documentation**
+
+http://localhost:8080/Xpay/v1/api/swagger-ui.html
+
+**Scheduled Jobs**
+
+The application runs background schedulers automatically on startup:
+1. Daily transaction summary generation
+2. Automated commission processing
+
+No manual trigger is required.
 
 ## 🧱 Core Domain Concepts
 

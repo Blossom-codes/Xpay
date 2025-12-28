@@ -43,7 +43,7 @@ public class TransactionController {
             )@RequestParam(required = false) String status,
             @Parameter(
                     description = "Account number (source or destination)",
-                    example = "53000001"
+                    example = "5300000001"
             )
             @RequestParam(required = false) String accountNumber,
 
